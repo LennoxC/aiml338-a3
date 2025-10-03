@@ -10,7 +10,7 @@ from sklearn.metrics import recall_score, precision_score
 
 # plot one or more features (using separate plots) for a start and end date, if y is set then it shows the anomalies
 #  (could be predicted or real if ground truth used)
-def plot_features(df, start_day, start_year, end_day, end_year, features, y=None):
+def plot_features(df, start_day, start_year, end_day, end_year, features, use_datetime=False, y=None):
     # Filter the period
     mask = (
         (df['year'] > start_year) | 
@@ -21,8 +21,14 @@ def plot_features(df, start_day, start_year, end_day, end_year, features, y=None
     )
     df_period = df[mask].copy()
     df_period = df_period.reset_index(drop=False)  # Keep original indices for mapping y
-    df_period['date'] = pd.to_datetime(
-        df_period['year'].astype(int).astype(str) + df_period['day_of_year'].astype(int).astype(str).str.zfill(3), format='%Y%j')
+
+
+    if use_datetime:
+        df_period['date'] = df_period['date_time']
+    else:
+        df_period['date'] = pd.to_datetime(
+            df_period['year'].astype(int).astype(str) + df_period['day_of_year'].astype(int).astype(str).str.zfill(3),
+            format='%Y%j')
 
     if isinstance(features, str):
         features = [features]
@@ -37,7 +43,7 @@ def plot_features(df, start_day, start_year, end_day, end_year, features, y=None
             plt.scatter(
                 df_period.loc[anomaly_indices, 'date'],
                 df_period.loc[anomaly_indices, feature],
-                color='red', marker='x', s=100, label='Anomaly'
+                color='black', marker='x', s=100, label='Anomaly'
             )
             plt.legend()
 
